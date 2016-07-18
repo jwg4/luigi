@@ -169,6 +169,13 @@ class RecentRunHandler(BaseTaskHistoryHandler):
         self.render("recent.html", tasks=tasks)
 
 
+class RecentRunJsonHandler(BaseTaskHistoryHandler):
+    def get(self):
+        tasks = self._scheduler.task_history.find_latest_runs()
+        self.set_header("Content-Type", 'application/json')
+        self.write(json.dumps(tasks)) 
+
+
 class ByNameHandler(BaseTaskHistoryHandler):
     def get(self, name):
         tasks = self._scheduler.task_history.find_all_by_name(name)
@@ -219,6 +226,7 @@ def app(scheduler):
         (r'/tasklist', AllRunHandler, {'scheduler': scheduler}),
         (r'/tasklist/(.*?)', SelectedRunHandler, {'scheduler': scheduler}),
         (r'/history', RecentRunHandler, {'scheduler': scheduler}),
+        (r'/history/json', RecentRunJsonHandler, {'scheduler': scheduler}),
         (r'/history/by_name/(.*?)', ByNameHandler, {'scheduler': scheduler}),
         (r'/history/by_id/(.*?)', ByIdHandler, {'scheduler': scheduler}),
         (r'/history/by_params/(.*?)', ByParamsHandler, {'scheduler': scheduler})
